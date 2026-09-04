@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "壓降計算器",
+  "short_name": "壓降計算器",
+  "description": "EG 50%／PG 25% 圓管、矩形流道與彎頭壓降計算",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f4f0",
+  "theme_color": "#0b2d36",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
