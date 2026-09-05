@@ -2,7 +2,7 @@
   "id": "./",
   "name": "壓降計算器",
   "short_name": "壓降計算器",
-  "description": "EG 50%／PG 25% 圓管、矩形流道與彎頭壓降計算",
+  "description": "EG 50%／PG 25% 管路壓降、泵浦工作點與並聯流量分析",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",
