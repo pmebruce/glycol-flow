@@ -1,6 +1,6 @@
 # 壓降計算器 · GitHub Pages 版
 
-獨立靜態 PWA，支援 EG 50%／PG 25%、圓管／矩形流道、直管與彎頭壓降、系統管路組裝、泵浦曲線與工作點、並聯支路流量分配、公式、CSV、離線使用及「壓」字圖示。計算不使用 ChatGPT API。
+獨立靜態 PWA，支援 EG 50%／PG 25%、圓管／矩形流道、直管與彎頭壓降、系統管路組裝、泵浦曲線與工作點、並聯支路流量分配、公式、CSV 與離線使用。計算不使用 ChatGPT API。
 
 ## 系統分析
 
@@ -45,4 +45,4 @@ npm test
 
 ## 圖示及來源
 
-圖示為深青底白色「壓」。字形依 Noto Sans CJK TC Bold（SIL Open Font License）轉為向量輪廓，PNG/ICO 已一併提供。來源：https://github.com/notofonts/noto-cjk 。保留原有 GLYCOL FLOW 分享圖。其他元件授權依各相依套件。
+v6 圖示以深青底、壓力表、冷卻管路與三路並聯流線表達液冷系統分析；提供 180、192、512 px 及 ICO 版本。保留原有 GLYCOL FLOW 分享圖。其他元件授權依各相依套件。
