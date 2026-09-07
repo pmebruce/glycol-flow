@@ -5,17 +5,17 @@ import {createHash} from 'node:crypto';
 const out=resolve('dist-pages');
 await mkdir(join(out,'icons'),{recursive:true});
 for(const [from,to] of [
-  ['favicon-dpcalc-v7.ico','favicon-v7.ico'],
-  ['favicon-dpcalc-v7.ico','favicon.ico'],
-  ['apple-touch-icon-dpcalc-v7.png','icons/apple-touch-icon-v7.png'],
-  ['apple-touch-icon-dpcalc-v7.png','icons/apple-touch-icon.png'],
-  ['icons/dpcalc-192-v7.png','icons/icon-192-v7.png'],
-  ['icons/dpcalc-192-v7.png','icons/icon-192.png'],
-  ['icons/dpcalc-512-v7.png','icons/icon-512-v7.png'],
-  ['icons/dpcalc-512-v7.png','icons/icon-512.png'],
+  ['favicon-dpcalc-v8.ico','favicon-v8.ico'],
+  ['favicon-dpcalc-v8.ico','favicon.ico'],
+  ['apple-touch-icon-dpcalc-v8.png','icons/apple-touch-icon-v8.png'],
+  ['apple-touch-icon-dpcalc-v8.png','icons/apple-touch-icon.png'],
+  ['icons/dpcalc-192-v8.png','icons/icon-192-v8.png'],
+  ['icons/dpcalc-192-v8.png','icons/icon-192.png'],
+  ['icons/dpcalc-512-v8.png','icons/icon-512-v8.png'],
+  ['icons/dpcalc-512-v8.png','icons/icon-512.png'],
   ['og.png','og.png'],
 ])await cp(join('public',from),join(out,to));
-const manifest={id:'./',name:'壓降計算器',short_name:'壓降計算器',description:'EG 50%／PG 25% 管路壓降、泵浦工作點與並聯流量分析',lang:'zh-Hant',start_url:'./',scope:'./',display:'standalone',background_color:'#071d52',theme_color:'#071d52',icons:[{src:'./icons/icon-192-v7.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'./icons/icon-512-v7.png',sizes:'512x512',type:'image/png',purpose:'any'}]};
+const manifest={id:'./',name:'壓降計算器',short_name:'壓降計算器',description:'EG 50%／PG 25% 管路壓降、泵浦工作點與並聯流量分析',lang:'zh-Hant',start_url:'./',scope:'./',display:'standalone',background_color:'#071d52',theme_color:'#071d52',icons:[{src:'./icons/icon-192-v8.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'./icons/icon-512-v8.png',sizes:'512x512',type:'image/png',purpose:'any'}]};
 await writeFile(join(out,'manifest.webmanifest'),JSON.stringify(manifest,null,2));
 await writeFile(join(out,'.nojekyll'),'');
 async function walk(dir,prefix=''){
