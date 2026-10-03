@@ -155,12 +155,18 @@ function mount(){
   if(!oldHeader||!intro)return false;
   var hero=document.createElement('header');hero.className='tool-hero';
   hero.innerHTML='<div class="tool-hero-nav"><a class="tool-home-link" href="https://pmebruce.github.io/engineering-toolbox/">← 工程工具箱</a></div><div class="tool-hero-main"><img class="tool-hero-logo" src="./icons/icon-192-v9.png" alt="GLYCOL FLOW Logo"><div class="tool-hero-copy"><p class="tool-kicker">GLYCOL FLOW / PRESSURE DROP</p><h1>液冷壓降計算器</h1></div></div><p class="tool-hero-description">從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。</p>';
-  var button=oldHeader.querySelector('.install-button');
-  if(button){button.classList.add('tool-install');hero.querySelector('.tool-hero-nav').appendChild(button);function syncButton(){if(!button.textContent.includes('已安裝')){var node=Array.from(button.childNodes).find(function(n){return n.nodeType===3&&n.textContent.trim();});if(node)node.textContent='加入主畫面';}}syncButton();new MutationObserver(syncButton).observe(button,{childList:true,subtree:true,characterData:true});}
+  var sourceButton=oldHeader.querySelector('.install-button');
+  if(sourceButton){
+    var button=sourceButton.cloneNode(true);button.classList.add('tool-install');
+    button.addEventListener('click',function(){var current=oldHeader.querySelector('.install-button');if(current)current.click();});
+    hero.querySelector('.tool-hero-nav').appendChild(button);
+    function syncButton(){var current=oldHeader.querySelector('.install-button');if(!current)return;var installed=current.textContent.includes('已安裝');button.innerHTML=current.innerHTML;if(!installed){var node=Array.from(button.childNodes).find(function(n){return n.nodeType===3&&n.textContent.trim();});if(node)node.textContent='加入主畫面';}}
+    syncButton();new MutationObserver(syncButton).observe(oldHeader,{childList:true,subtree:true,characterData:true});
+  }
   var title=hero.querySelector('h1'),description=hero.querySelector('.tool-hero-description');
   function sync(){var h=intro.querySelector('h1'),p=intro.querySelector('p');if(h)title.textContent=(h.childNodes[0]&&h.childNodes[0].textContent||h.textContent).trim().replace(/\.$/,'');if(p)description.textContent=p.textContent.trim();}
   sync();new MutationObserver(sync).observe(intro,{subtree:true,childList:true,characterData:true});
-  oldHeader.parentNode.insertBefore(hero,oldHeader);oldHeader.style.display='none';intro.style.display='none';return true;
+  var root=document.getElementById('root');document.body.insertBefore(hero,root);oldHeader.style.display='none';intro.style.display='none';return true;
 }
 function start(){if(mount())return;var observer=new MutationObserver(function(){if(mount())observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();

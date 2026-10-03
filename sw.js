@@ -1,7 +1,7 @@
 /* Reliable offline shell for GitHub Pages PWA. */
 const BASE=new URL('./',self.location.href);
 const PREFIX='glycol-flow-pages-'+encodeURIComponent(BASE.pathname)+'-';
-const CACHE=PREFIX+'stable-start-20261003-v1';
+const CACHE=PREFIX+'stable-start-20261003-v2';
 const INDEX=new URL('index.html',BASE).href;
 const FILES=["./","./index.html","./assets/index-CLiKq-oZ.js","./assets/index-DzCSPc_p.css","./favicon-v9.ico","./favicon.ico","./icons/apple-touch-icon-v9.png","./icons/apple-touch-icon.png","./icons/icon-192-v9.png","./icons/icon-192.png","./icons/icon-512-v9.png","./icons/icon-512.png","./manifest.webmanifest","./og.png"];
 const URLS=FILES.map(path=>new URL(path,BASE).href);
