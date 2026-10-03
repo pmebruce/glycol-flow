@@ -128,10 +128,12 @@ header.tool-hero h1{font-size:25px!important}
 <body>
   <div id="root"></div>
   <noscript>請啟用 JavaScript 以使用壓降計算器。</noscript>
-<script id="tool-hero-runtime-v1">
-window.addEventListener('DOMContentLoaded',function(){
+<script id="tool-hero-runtime-v2">
+(function(){
+function mount(){
   var oldHeader=document.querySelector('.site-header'),intro=document.querySelector('.title-row');
-  if(!oldHeader||!intro||document.querySelector('.tool-hero'))return;
+  if(document.querySelector('.tool-hero'))return true;
+  if(!oldHeader||!intro)return false;
   var hero=document.createElement('header');hero.className='tool-hero';
   hero.innerHTML='<div class="tool-hero-nav"><a class="tool-home-link" href="https://pmebruce.github.io/engineering-toolbox/">← 工程工具箱</a></div><div class="tool-hero-main"><img class="tool-hero-logo" src="./icons/icon-192-v9.png" alt="GLYCOL FLOW Logo"><div class="tool-hero-copy"><p class="tool-kicker">GLYCOL FLOW / PRESSURE DROP</p><h1>液冷壓降計算器</h1></div></div><p class="tool-hero-description">從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。</p>';
   var button=oldHeader.querySelector('.install-button');
@@ -139,8 +141,11 @@ window.addEventListener('DOMContentLoaded',function(){
   var title=hero.querySelector('h1'),description=hero.querySelector('.tool-hero-description');
   function sync(){var h=intro.querySelector('h1'),p=intro.querySelector('p');if(h)title.textContent=(h.childNodes[0]&&h.childNodes[0].textContent||h.textContent).trim().replace(/\.$/,'');if(p)description.textContent=p.textContent.trim();}
   sync();new MutationObserver(sync).observe(intro,{subtree:true,childList:true,characterData:true});
-  oldHeader.parentNode.insertBefore(hero,oldHeader);oldHeader.style.display='none';intro.style.display='none';
-});
+  oldHeader.parentNode.insertBefore(hero,oldHeader);oldHeader.style.display='none';intro.style.display='none';return true;
+}
+function start(){if(mount())return;var observer=new MutationObserver(function(){if(mount())observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
 </script>
 </body>
 </html>
