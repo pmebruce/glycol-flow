@@ -51,7 +51,38 @@ footer,.app-footer,.page-footer,.footer-note{font-size:14px!important;line-heigh
 .hero-result>span:first-child{font-size:18px!important;line-height:1.5!important}.hero-result em,.big .unit{font-size:20px!important}
 
 
-</style></head>
+</style><style id="glycol-responsive-type-v2">
+/* Keep the compact brand and fluid names intact at the shared reading scale. */
+.site-header{height:auto;min-height:94px;padding-block:12px}
+.site-header .brand{min-width:0}
+.site-header .brand-mark,.site-header .header-actions{flex-shrink:0}
+.site-header .brand>span:not(.brand-mark){font-size:22px!important;line-height:1.25!important;white-space:nowrap;letter-spacing:1px}
+.site-header .brand small{font-size:14px!important;line-height:1.4!important;white-space:nowrap;letter-spacing:.02em!important}
+.fluid-choice .fluid-button{height:auto;min-height:94px;position:relative;padding:16px 38px 16px 16px}
+.fluid-choice .fluid-button>span:first-child{min-width:0;width:100%}
+.fluid-choice .fluid-button strong{font-size:24px!important;line-height:1.25!important;white-space:nowrap}
+.fluid-choice .fluid-button small{font-size:16px!important;line-height:1.5!important;white-space:normal;overflow-wrap:normal}
+.fluid-choice .fluid-button>.choice-check,.fluid-choice .fluid-button>svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);flex-shrink:0;width:20px;height:20px}
+@media(max-width:760px){
+.site-header{min-height:82px;gap:8px}
+.site-header .brand{gap:8px}
+.site-header .brand>span:not(.brand-mark){font-size:18px!important;letter-spacing:.4px}
+.site-header .brand small{font-size:13px!important}
+.site-header .install-button{font-size:16px!important;white-space:nowrap;padding:9px 10px;gap:6px}
+.fluid-choice{gap:10px}
+.fluid-choice .fluid-button{min-height:100px;padding:14px 10px 36px;align-items:flex-start}
+.fluid-choice .fluid-button strong{font-size:24px!important}
+.fluid-choice .fluid-button small{font-size:16px!important}
+.fluid-choice .fluid-button>.choice-check,.fluid-choice .fluid-button>svg{right:10px;top:auto;bottom:10px;transform:none;width:18px;height:18px}
+}
+@media(max-width:360px){
+.site-header .brand-mark{width:32px;height:32px}
+.site-header .brand>span:not(.brand-mark){font-size:16px!important;letter-spacing:0}
+.site-header .install-button{font-size:14px!important;padding-inline:8px}
+.fluid-choice .fluid-button strong{font-size:22px!important}
+}
+</style>
+</head>
 <body>
   <div id="root"></div>
   <noscript>請啟用 JavaScript 以使用壓降計算器。</noscript>
