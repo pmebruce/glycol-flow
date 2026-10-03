@@ -1,7 +1,7 @@
 /* Replaced by prepare-github-pages.mjs after the static build. */
 const BASE=new URL('./',self.location.href);
 const PREFIX='glycol-flow-pages-'+encodeURIComponent(BASE.pathname)+'-';
-const CACHE=PREFIX+'ee93b0caab66e531';
+const CACHE=PREFIX+'typography-20261003-v1';
 const FILES=["./","./assets/index-CLiKq-oZ.js","./assets/index-DzCSPc_p.css","./favicon-v9.ico","./favicon.ico","./icons/apple-touch-icon-v9.png","./icons/apple-touch-icon.png","./icons/icon-192-v9.png","./icons/icon-192.png","./icons/icon-512-v9.png","./icons/icon-512.png","./manifest.webmanifest","./og.png"];
 const URLS=FILES.map(path=>new URL(path,BASE).href);
 const ASSETS=new Set(URLS);
