@@ -70,9 +70,12 @@ export default function Home() {
 
   return <div className="app-shell">
     <a href={view==='single'?'#calculation':'#system-analysis'} className="skip-link">跳到計算輸入</a>
-    <header className="site-header"><a className="brand" href="#"><span className="brand-mark"><Droplets aria-hidden="true"/></span><span>GLYCOL FLOW<small>液冷工程工具</small></span></a><div className="header-actions">{view==='single'&&<a href="#formulas" className="formula-link"><BookOpen size={19}/>公式</a>}<Button className="install-button" variant="outline" onClick={async()=>{if(!await pwa.install())setInstallOpen(true);}}><Smartphone/>{pwa.installed?'已安裝':'安裝 App'}</Button></div></header>
+    <header className="tool-hero">
+      <div className="tool-hero-nav"><a className="tool-home-link" href="https://pmebruce.github.io/engineering-toolbox/">← 工程工具箱</a><Button className="install-button tool-install" variant="outline" onClick={async()=>{if(!await pwa.install())setInstallOpen(true);}}><Smartphone/>{pwa.installed?'已安裝':'加入主畫面'}</Button></div>
+      <div className="tool-hero-main"><img className="tool-hero-logo" src="./icons/icon-192-v9.png" alt="GLYCOL FLOW Logo"/><div className="tool-hero-copy"><p className="tool-kicker">GLYCOL FLOW / PRESSURE DROP</p><h1>{view==='single'?'液冷壓降計算器':'液冷系統分析'}</h1></div></div>
+      <p className="tool-hero-description">{view==='single'?'從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。':'組裝共用管路與並聯支路，找出泵浦實際工作點。'}</p>
+    </header>
     <main>
-      <div className="title-row"><div><h1>{view==='single'?'液冷壓降計算器':'液冷系統分析'}<span className="title-dot">.</span></h1><p>{view==='single'?'從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。':'組裝共用管路與並聯支路，找出泵浦實際工作點。'}</p></div><span className={'offline-badge'+(pwa.offline?' is-offline':'')}>{pwa.offline?<WifiOff size={15}/>:pwa.ready?<Check size={15}/>:<span className="status-dot"/>}{pwa.offline?(pwa.ready?'離線模式':'目前離線'):pwa.ready?'可離線計算':pwa.failed?'線上模式':'準備離線功能'}</span></div>
       <div className="app-mode-tabs" aria-label="計算模式"><Button variant="ghost" className={view==='single'?'active':''} aria-pressed={view==='single'} onClick={()=>setView('single')}>單段管路</Button><Button variant="ghost" className={view==='system'?'active':''} aria-pressed={view==='system'} onClick={()=>setView('system')}>系統分析</Button></div>
       {view==='single'?<>
       <div className="mode-row"><div className="shape-switch" aria-label="流道形狀"><Button variant="ghost" aria-pressed={form.shape==='circle'} onClick={()=>set('shape','circle')} className={form.shape==='circle'?'active':''}><Circle/>圓管</Button><Button variant="ghost" aria-pressed={form.shape==='rectangle'} onClick={()=>set('shape','rectangle')} className={form.shape==='rectangle'?'active':''}><RectangleHorizontal/>矩形流道</Button></div><span className="saved-label">{saved?<Check size={14}/>:<Info size={14}/>} {saved?'設定自動保留於本機':'本機無法保存設定'}</span></div>
