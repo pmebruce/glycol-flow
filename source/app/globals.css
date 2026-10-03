@@ -427,3 +427,7 @@ header.tool-hero h1{font-size:28px!important;line-height:1.25!important}
 header.tool-hero h1{font-size:25px!important}
 .tool-home-link,.tool-install{font-size:15px!important}
 }
+
+/* High-contrast hero text for the light glycol theme. */
+.tool-home-link,.tool-kicker{color:#17695d!important}
+.tool-hero-description{color:#526967!important}

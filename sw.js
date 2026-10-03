@@ -1,7 +1,7 @@
 /* Replaced by prepare-github-pages.mjs after the static build. */
 const BASE=new URL('./',self.location.href);
 const PREFIX='glycol-flow-pages-'+encodeURIComponent(BASE.pathname)+'-';
-const CACHE=PREFIX+'typography-compact-20261003-v3-hero3';
+const CACHE=PREFIX+'typography-compact-20261003-v3-hero4';
 const FILES=["./","./assets/index-CLiKq-oZ.js","./assets/index-DzCSPc_p.css","./favicon-v9.ico","./favicon.ico","./icons/apple-touch-icon-v9.png","./icons/apple-touch-icon.png","./icons/icon-192-v9.png","./icons/icon-192.png","./icons/icon-512-v9.png","./icons/icon-512.png","./manifest.webmanifest","./og.png"];
 const URLS=FILES.map(path=>new URL(path,BASE).href);
 const ASSETS=new Set(URLS);
@@ -21,7 +21,7 @@ self.addEventListener('install',event=>event.waitUntil((async()=>{
       await cache.put(url,response);
     }));
   }catch(error){await caches.delete(CACHE);throw error;}
-  if(!self.registration.active)await self.skipWaiting();
+  await self.skipWaiting();
 })()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
   await Promise.all((await caches.keys()).filter(name=>name.startsWith(PREFIX)&&name!==CACHE).map(name=>caches.delete(name)));
