@@ -1,8 +1,8 @@
 {
   "urls": [
     "./",
-    "./assets/index-CLiKq-oZ.js",
-    "./assets/index-DzCSPc_p.css",
+    "./assets/index-CBaG8CJc.css",
+    "./assets/index-ESBmPi90.js",
     "./favicon-v9.ico",
     "./favicon.ico",
     "./icons/apple-touch-icon-v9.png",
@@ -11,6 +11,7 @@
     "./icons/icon-192.png",
     "./icons/icon-512-v9.png",
     "./icons/icon-512.png",
+    "./licenses/Fluids-MIT.txt",
     "./manifest.webmanifest",
     "./og.png"
   ]

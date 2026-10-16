@@ -1,0 +1,8 @@
+import type {Draft} from '@/lib/form-state';
+const names={manual:'手動 K（閥件／快接等）',entrance:'銳邊入口 · K 0.57',exit:'排入大槽 · K 1',expansion:'圓管突然擴大 · Borda–Carnot'};
+export function FittingsEditor({items,onChange,diameter}:{items:Draft['fittings'];onChange:(items:Draft['fittings'])=>void;diameter:string}){
+ const update=(index:number,key:string,value:string)=>onChange(items.map((b,j)=>j===index?{...b,[key]:value}:b));
+ return <div className="fittings-editor"><h3>逐項配件損失</h3><p className="support">每個配件可指定 K 所採用的圓管參考內徑。矩形流道若用手動 K，請填供應商定義的等效圓截面內徑，不能直接填 Dh。</p>
+ {items.map((b,j)=><article className="fitting-card" key={j}><div className="fitting-heading"><strong>配件 {j+1}</strong><button type="button" className="fitting-remove" onClick={()=>onChange(items.filter((_,index)=>index!==j))} aria-label={'移除配件 '+(j+1)}>移除</button></div><label className="field">配件種類<select value={b.kind} onChange={e=>update(j,'kind',e.target.value)}>{Object.entries(names).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label><div className="two-fields">{[['count','數量（個）'],['diameter',b.kind==='expansion'?'上游內徑（mm）':'K 參考內徑（mm）'],...(b.kind==='manual'?[['k','單個 K']]:[]),...(b.kind==='expansion'?[['outlet','下游內徑（mm）']]:[])].map(([key,label])=><label className="field" key={key}>{label}<input type="text" inputMode={key==='count'?'numeric':'decimal'} value={b[key as 'count'|'diameter'|'outlet'|'k']} onChange={e=>update(j,key,e.target.value)}/></label>)}</div></article>)}
+ <button type="button" className="fitting-add" disabled={items.length>=50} onClick={()=>onChange([...items,{kind:'manual',count:'1',diameter,outlet:'20',k:'0'}])}>＋ 新增配件</button><p className="fine-print">手動 K 需對應實際流況。入口、出口與突擴的自動估算限參考管徑 Re ≥ 4000。逐項配件不會取代下方「其他配件合計 K」，請勿重複輸入同一配件。</p></div>;
+}

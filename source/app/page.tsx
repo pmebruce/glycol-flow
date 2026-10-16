@@ -1,4 +1,5 @@
 'use client';
+import { FittingsEditor } from '@/components/fittings-editor';
 import { useEffect,useMemo,useState } from 'react';
 import { ArrowDown,ArrowDownToLine,ArrowRight,BookOpen,Check,ChevronRight,Circle,Download,Droplets,Gauge,Info,Printer,RectangleHorizontal,RotateCcw,Smartphone,Thermometer,TriangleAlert,WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,10 +25,11 @@ function Stat({label,value,unit}:{label:string;value:string;unit?:string}) {retu
 function Report({r,unit}:{r:SuccessResult;unit:keyof typeof PRESSURE_UNITS}) {
   const factor=PRESSURE_UNITS[unit].factor;
   const pressure=(value:number|null)=>n(value===null?null:value*factor,unit==='Pa'?1:3);
-  const parts=[{label:'直管',value:r.straight,color:'#7ad9ba'},{label:'彎頭',value:r.bendDrop??0,color:'#efc487'},{label:'附加 K',value:r.extra,color:'#a8c7db'}];
+  const parts=[{label:'直管',value:r.straight,color:'#7ad9ba'},{label:'彎頭',value:r.bendDrop??0,color:'#efc487'},{label:'逐項配件',value:r.fittingDrop,color:'#d7a7ce'},{label:'附加 K',value:r.extra,color:'#a8c7db'}];
   return <>
     <div className="result-breakdown">{parts.map(p=><div key={p.label}><span><i style={{background:p.color}}/>{p.label}壓降</span><strong>{p.label==='彎頭'&&r.incomplete?'待定':pressure(p.value)}<small>{unit}</small></strong></div>)}</div>
     {r.total!==null&&r.total>0&&<div className="proportion-bar" aria-label="壓降占比">{parts.map(p=><span key={p.label} style={{width:`${p.value/r.total!*100}%`,background:p.color}} title={`${p.label} ${n(p.value/r.total!*100,1)}%`}/>)}</div>}
+    {r.fittings.length>0&&<div className="fitting-results"><h3>配件壓降明細</h3>{r.fittings.map((b,j)=><div key={j}><span>配件 {j+1} · {b.count} 個<br/><small>Ø{n(b.diameter)} mm · K {n(b.k)} · {n(b.velocity)} m/s</small></span><strong>{pressure(b.dp)} {unit}</strong></div>)}</div>}
     <dl className="result-stats"><Stat label="平均流速 v" value={n(r.v)} unit="m/s"/><Stat label="雷諾數 Re" value={n(r.re,0)}/><Stat label="水力直徑 Dh" value={n(r.g.dh*1000)} unit="mm"/><Stat label="摩擦係數 f" value={r.re===0?'—':n(r.f.f,5)}/><Stat label="液柱高度 H" value={n(r.head)} unit="m"/><Stat label="液壓功率" value={n(r.hydraulicPower)} unit="W"/></dl>
     <div className="result-note"><span>流量 <b>{n(r.q*60000)} L/min</b></span><span>質量流率 <b>{n(r.massFlow,4)} kg/s</b></span></div>
   </>;
@@ -37,10 +39,11 @@ function exportReport(r:SuccessResult) {
     ['冷卻液',r.i.fluid==='eg50'?'EG 50%':'PG 25%','vol%'],['物性來源',r.i.custom?'手動物性':'Dynalene 原廠表插值',''],['平均液溫',r.i.temperature,'°C'],['密度',r.p.rho,'kg/m³'],['動力黏度',r.p.muMPas,'mPa·s'],['運動黏度',r.p.nu*1e6,'mm²/s'],
     ['流道形狀',r.i.shape==='circle'?'圓管':'矩形',''],['圓管內徑',r.i.shape==='circle'?r.i.diameter:'不適用','mm'],['矩形寬',r.i.shape==='rectangle'?r.i.width:'不適用','mm'],['矩形高',r.i.shape==='rectangle'?r.i.height:'不適用','mm'],['水力直徑',r.g.dh*1000,'mm'],['截面積',r.g.area*1e6,'mm²'],['直管長度（不含彎頭）',r.i.length,'m'],['絕對粗糙度',r.i.roughness,'mm'],
     ['體積流量',r.q*60000,'L/min'],['平均流速',r.v,'m/s'],['雷諾數',r.re,''],['流況',r.f.regime,''],['摩擦模型',r.f.name,''],['Darcy 摩擦係數',r.f.f,''],['彎頭模式',r.i.bendMode==='auto'?'Rennels':'手動 K',''],['附加K',r.i.extraK,''],
-    ['直管壓降',r.straight,'Pa'],['彎頭壓降',r.bendDrop,'Pa'],['附加壓降',r.extra,'Pa'],['總壓降',r.total,'Pa'],['總壓降',r.total===null?null:r.total/1000,'kPa'],['液體揚程',r.head,'m'],['液壓功率',r.hydraulicPower,'W']];
+    ['直管壓降',r.straight,'Pa'],['彎頭壓降',r.bendDrop,'Pa'],['附加壓降',r.extra,'Pa'],['逐項配件壓降',r.fittingDrop,'Pa'],['總壓降',r.total,'Pa'],['總壓降',r.total===null?null:r.total/1000,'kPa'],['液體揚程',r.head,'m'],['液壓功率',r.hydraulicPower,'W']];
   for(const b of r.bends)rows.push([`${b.angle}° 數量`,b.count,'個'],[`${b.angle}° 中心半徑`,r.i.bendMode==='auto'?b.radius:'手動K未使用','mm'],[`${b.angle}° 單個K`,b.k,''],[`${b.angle}° 合計壓降`,b.dp,'Pa']);
+  for(const [j,b] of r.fittings.entries())rows.push([`配件 ${j+1} 種類`,b.kind,''],[`配件 ${j+1} 數量`,b.count,''],[`配件 ${j+1} 參考內徑`,b.diameter,'mm'],[`配件 ${j+1} 單個K`,b.k,''],[`配件 ${j+1} 參考流速`,b.velocity,'m/s'],[`配件 ${j+1} 壓降`,b.dp,'Pa']);
   for(const note of r.notices)rows.push(['適用性說明',note.text,'']);
-  rows.push(['範圍','單一路徑流阻；未含靜壓高差、未輸入之歧管與其他配件；不是泵工作點。',''],['壓降公式','Δp = (fL/Dh + ΣnK + K附加)ρv²/2','']);
+  rows.push(['範圍','單一路徑流阻；未含靜壓高差、未輸入之歧管與其他配件；不是泵工作點。',''],['壓降公式','Δp = (fL/Dh + ΣnK + K附加)ρv²/2 + Σ配件 nKρv參考²/2','']);
   const csv='\uFEFF'+rows.map(row=>row.map(c=>'"'+String(c===null?'待定':c).replaceAll('"','""')+'"').join(',')).join('\r\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   const link=document.createElement('a');link.href=url;link.download=`glycol-pressure-${r.i.fluid}-${r.i.shape}.csv`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
@@ -105,6 +108,7 @@ export default function Home() {
             <div className="field"><label htmlFor="bend-mode">彎頭算法</label><NativeSelect id="bend-mode" className="big-select" value={form.bendMode} onChange={e=>set('bendMode',e.target.value as Draft['bendMode'])}><NativeSelectOption value="auto">自動：圓滑彎頭 + 中心半徑</NativeSelectOption><NativeSelectOption value="manual">手動：輸入單個彎頭 K</NativeSelectOption></NativeSelect></div>
             <p className="support">{form.bendMode==='auto'?'R 為彎頭中心線半徑；自動 K 已含弧長摩擦。':'K 以本流道平均速度為基準，需對應實際流況，並涵蓋整個彎頭損失。'}</p>
             <div className="bend-list">{form.bends.map((b,j)=><div className={'bend-row'+(parseNumber(b.count)>0?' has-bend':'')} key={b.angle}><div className="bend-angle"><svg viewBox="0 0 48 40" aria-hidden="true"><path d={b.angle===45?'M7 33V24Q7 20 12 15L24 3':b.angle===90?'M8 34V20Q8 8 20 8H38':'M8 34V18Q8 4 23 4Q38 4 38 18V34'} fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/></svg><strong>{b.angle}°</strong></div><NumberField id={`count-${b.angle}`} label="數量" value={b.count} unit="個" integer onChange={s=>bendValue(j,'count',s)}/>{form.bendMode==='auto'?<NumberField id={`radius-${b.angle}`} label="中心半徑 R" value={b.radius} unit="mm" disabled={parseNumber(b.count)===0} onChange={s=>bendValue(j,'radius',s)}/>:<NumberField id={`k-${b.angle}`} label="單個 K" value={b.k} disabled={parseNumber(b.count)===0} onChange={s=>bendValue(j,'k',s)}/>}</div>)}</div>
+            <FittingsEditor items={form.fittings} onChange={items=>set('fittings',items)} diameter={form.shape==='circle'?form.diameter:String(r?Math.sqrt(4*r.g.area/Math.PI)*1000:10)}/>
             <NumberField id="extra-k" label="其他配件合計 K" value={form.extraK} onChange={setNumeric('extraK')} help="可納入接頭、閥件、入口／出口等已知損失。預設 0，未自動加入。"/>
             <div className="form-footer"><span><Check size={16}/>修改即時計算</span><Button variant="ghost" className="reset-button" onClick={()=>setResetOpen(true)}><RotateCcw/>重設範例</Button></div>
           </section>

@@ -1,13 +1,14 @@
-import { DEFAULTS, type Inputs } from './hydraulics.ts';
+import { DEFAULTS, type Inputs, type FittingInput } from './hydraulics.ts';
 
 export const NUMERIC_FIELDS = ['temperature','density','viscosity','diameter','width','height','length','roughness','flow','velocity','extraK'] as const;
 export type NumericField = typeof NUMERIC_FIELDS[number];
-export type Draft = Omit<Inputs,NumericField|'bends'> & Record<NumericField,string> & {
+export type Draft = Omit<Inputs,NumericField|'bends'|'fittings'> & Record<NumericField,string> & {
+  fittings: {kind:FittingInput['kind'];count:string;diameter:string;outlet:string;k:string}[];
   bends: {angle:45|90|180;count:string;radius:string;k:string}[];
 };
 export function createDraft(i:Inputs=DEFAULTS):Draft {
   const numeric=Object.fromEntries(NUMERIC_FIELDS.map(k=>[k,String(i[k])])) as Record<NumericField,string>;
-  return {...i,...numeric,
+  return {...i,...numeric,fittings:(i.fittings??[]).map(b=>({...b,count:String(b.count),diameter:String(b.diameter),outlet:String(b.outlet),k:String(b.k)})),
     bends:i.bends.map(b=>({...b,count:String(b.count),radius:String(b.radius),k:String(b.k)}))};
 }
 export function parseNumber(s:string):number {
@@ -16,7 +17,7 @@ export function parseNumber(s:string):number {
 }
 export function toInputs(d:Draft):Inputs {
   const numeric=Object.fromEntries(NUMERIC_FIELDS.map(k=>[k,parseNumber(d[k])])) as Record<NumericField,number>;
-  return {...d,...numeric,
+  return {...d,...numeric,fittings:d.fittings.map(b=>({...b,count:parseNumber(b.count),diameter:parseNumber(b.diameter),outlet:parseNumber(b.outlet),k:parseNumber(b.k)})),
     bends:d.bends.map(b=>({...b,count:parseNumber(b.count),radius:parseNumber(b.radius),k:parseNumber(b.k)}))};
 }
 export function restoreDraft(raw:string):Draft {
@@ -33,5 +34,6 @@ export function restoreDraft(raw:string):Draft {
     for(const key of ['count','radius','k'] as const)if(old&&typeof old[key]==='string'&&old[key].length<60)b[key]=old[key];
     return b;
   });
+  if(Array.isArray(f.fittings))draft.fittings=f.fittings.slice(0,50).filter((b:any)=>b&&['manual','entrance','exit','expansion'].includes(b.kind)).map((b:any)=>({kind:b.kind,...Object.fromEntries(['count','diameter','outlet','k'].map(k=>[k,typeof b[k]==='string'&&b[k].length<60?b[k]:'']))}));
   return draft;
 }

@@ -3,7 +3,9 @@ export type Fluid = 'eg50' | 'pg25';
 export type Shape = 'circle' | 'rectangle';
 export type Method = 'colebrook' | 'churchill' | 'max';
 export type BendInput = { angle: 45 | 90 | 180; count: number; radius: number; k: number };
+export type FittingInput = {kind:'manual'|'entrance'|'exit'|'expansion';count:number;diameter:number;outlet:number;k:number};
 export type Inputs = {
+  fittings?: FittingInput[];
   fluid: Fluid; temperature: number; custom: boolean; density: number; viscosity: number;
   shape: Shape; diameter: number; width: number; height: number; length: number; roughness: number;
   flowMode: 'flow' | 'velocity'; flowUnit: 'lpm' | 'm3h'; flow: number; velocity: number;
@@ -130,6 +132,23 @@ export function validate(i: Inputs) {
     if(i.roughness/1000/g.dh>0.05)errors.push('相對粗糙度 ε/Dh 超過 0.05，已超出本工具的計算範圍。');
     if(i.bendMode==='auto') for(const bend of i.bends)if(bend.count>0&&bend.radius/1000/g.dh<=0.5)errors.push(bend.angle+'° 彎頭需 R/Dh > 0.5；更急的轉角請改輸入實測 K。');
   }
+  if(i.fittings!==undefined&&!Array.isArray(i.fittings))errors.push('配件資料格式不正確。');
+  for(const [index,b] of (Array.isArray(i.fittings)?i.fittings:[]).entries()) {
+    const label='配件 '+(index+1)+'：';
+    if(!['manual','entrance','exit','expansion'].includes(b.kind))errors.push(label+'請選擇有效種類。');
+    check(b.count,0,10000,label+'數量需為 0–10000 的整數。');
+    if(!Number.isInteger(b.count))errors.push(label+'數量必須為整數。');
+    if(b.count===0)continue;
+    check(b.diameter,0,1e5,label+'參考內徑必須大於 0 mm。',false);
+    if(b.kind==='manual')check(b.k,0,1e8,label+'K 必須是 0 或正數。');
+    if(b.kind==='expansion'&&(!Number.isFinite(b.outlet)||b.outlet<=b.diameter||b.outlet>1e5))errors.push(label+'突擴下游內徑須大於上游內徑，且不超過 100000 mm。');
+    if(!errors.length&&b.kind!=='manual'){
+      const g=geometry(i),prop=i.custom?{rho:i.density,mu:i.viscosity/1000}:properties(i.fluid,i.temperature);
+      const q=i.flowMode==='flow'?(i.flowUnit==='lpm'?i.flow/60000:i.flow/3600):i.velocity*g.area;
+      const re=4*prop.rho*q/(Math.PI*(b.diameter/1000)*prop.mu);
+      if(q>0&&re<4000)errors.push(label+'參考管徑 Re < 4000，請改用對應流況的手動 K。');
+    }
+  }
   return [...new Set(errors)];
 }
 export function calculate(i: Inputs) {
@@ -157,12 +176,20 @@ export function calculate(i: Inputs) {
   if(incomplete)notices.push({kind:'warning',text:'目前 Re < 4000，紊流彎頭公式不適用。請在「彎頭與局部損失」改選手動 K，輸入此流況的供應商／實測值；總壓降暫不顯示，直管結果仍可用。'});
   if(i.shape==='rectangle'&&hasAuto&&!incomplete)notices.push({kind:'warning',text:'矩形彎頭以水力直徑代入圓管 Rennels 式估算，未含彎曲方向與截面形狀修正；精算請改用實測 K。'});
   if(hasAuto&&!incomplete&&ed>0.001)notices.push({kind:'warning',text:'彎頭相關式源自光滑管資料；目前粗糙度較高，彎頭損失宜用供應商 K 複核。'});
+  const fittings=(i.fittings??[]).map(b=>{
+    const area=b.count===0?g.area:Math.PI*(b.diameter/1000)**2/4,velocity=b.count===0?0:q/area;
+    const k=b.count===0?0:b.kind==='entrance'?0.57:b.kind==='exit'?1:b.kind==='expansion'?(1-(b.diameter/b.outlet)**2)**2:b.k;
+    return {...b,k,velocity,dp:b.count*k*p.rho*velocity**2/2,referenceK:k*(g.area/area)**2};
+  });
+  const fittingDrop=fittings.reduce((sum,b)=>sum+b.dp,0);
+  const allTotal=total===null?null:total+fittingDrop;
+  if(fittings.some(b=>b.count>0&&b.kind!=='manual'))notices.push({kind:'info',text:'入口／出口／突擴 K 採紊流工程估算，突擴為 Borda–Carnot；依每個配件的參考內徑計算流速。突擴結果為不可逆損失，不含靜壓回復。'});
   const entrance=f.regime==='laminar'?0.05*re*g.dh:0;
   if(q>0&&entrance>i.length&&i.length>0)notices.push({kind:'info',text:'估計層流入口發展長度約 '+entrance.toFixed(2)+' m，大於直管長度；充分發展流假設可能低估入口段壓降。'});
   if(i.custom)notices.push({kind:'info',text:'目前使用手動密度與黏度；修改液溫或液體時，請同步更新物性。'});
-  return {ok:true as const, i,g,p,q,v,re,ed,f,dynamic,straight,bends,bendDrop,extra,total,incomplete,notices,
-    head:total===null?null:total/(p.rho*9.80665), waterHead:total===null?null:total/9.80665,
-    hydraulicPower:total===null?null:total*q, massFlow:p.rho*q,
+  return {ok:true as const, i,g,p,q,v,re,ed,f,dynamic,straight,bends,bendDrop,extra,total:allTotal,fittings,fittingDrop,incomplete,notices,
+    head:allTotal===null?null:allTotal/(p.rho*9.80665), waterHead:allTotal===null?null:allTotal/9.80665,
+    hydraulicPower:allTotal===null?null:allTotal*q, massFlow:p.rho*q,
     arcLength:bends.reduce((s,b)=>s+b.arc,0), entrance};
 }
 export type SuccessResult = Extract<ReturnType<typeof calculate>,{ok:true}>;

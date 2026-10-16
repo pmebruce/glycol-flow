@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 
 const out=resolve('dist-pages');
 await mkdir(join(out,'icons'),{recursive:true});
+await cp('public/licenses',join(out,'licenses'),{recursive:true});
 for(const [from,to] of [
   ['favicon-dpcalc-v9.ico','favicon-v9.ico'],
   ['favicon-dpcalc-v9.ico','favicon.ico'],
