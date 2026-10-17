@@ -29,6 +29,7 @@ export function restoreDraft(raw:string):Draft {
     if(choices.includes(f[key]))Object.assign(draft,{[key]:f[key]});
   }
   if(typeof f.custom==='boolean')draft.custom=f.custom;
+  if(typeof f.customFluidName==='string'&&f.customFluidName.length<=100)draft.customFluidName=f.customFluidName;
   if(Array.isArray(f.bends))draft.bends=draft.bends.map((b,j)=>{
     const old=f.bends[j];
     for(const key of ['count','radius','k'] as const)if(old&&typeof old[key]==='string'&&old[key].length<60)b[key]=old[key];

@@ -1,8 +1,8 @@
 /* Replaced by prepare-github-pages.mjs after the static build. */
 const BASE=new URL('./',self.location.href);
 const PREFIX='glycol-flow-pages-'+encodeURIComponent(BASE.pathname)+'-';
-const CACHE=PREFIX+'ea656d4b5e9baa13';
-const FILES=["./","./assets/index-CBaG8CJc.css","./assets/index-ESBmPi90.js","./favicon-v9.ico","./favicon.ico","./icons/apple-touch-icon-v9.png","./icons/apple-touch-icon.png","./icons/icon-192-v9.png","./icons/icon-192.png","./icons/icon-512-v9.png","./icons/icon-512.png","./licenses/Fluids-MIT.txt","./manifest.webmanifest","./og.png"];
+const CACHE=PREFIX+'4c0a83ef87308613';
+const FILES=["./","./assets/index-BDX0sbZ0.js","./assets/index-Bv0lJBrY.css","./favicon-v9.ico","./favicon.ico","./icons/apple-touch-icon-v9.png","./icons/apple-touch-icon.png","./icons/icon-192-v9.png","./icons/icon-192.png","./icons/icon-512-v9.png","./icons/icon-512.png","./licenses/CoolProp-MIT.txt","./licenses/Fluids-MIT.txt","./manifest.webmanifest","./og.png"];
 const URLS=FILES.map(path=>new URL(path,BASE).href);
 const ASSETS=new Set(URLS);
 

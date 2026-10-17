@@ -52,3 +52,11 @@ v9 圖示改為無白邊的扁平化設計，以簡化壓力錶、放大的 ΔP�
 單段頁面可新增配件、數量、K 參考圓管內徑。支援手動 K、銳邊入口（Rennels K=0.57）、排入大槽出口 K=1、突擴 Borda–Carnot（對應 fluids diffuser_sharp 的 Rennels 方法）。每個配件按自己的截面流速換算壓降，再加總；不同參考管徑的原始 K 不直接相加。自動 K 限 Re≥4000；低 Re 需手動 K。突擴輸出為不可逆損失而非上下游靜壓差。新增逐項配件及原有合計 K 同時生效，勿重複。
 
 Fluids 來源 commit 652a01344477fb881f0879b7b69bb23f20deae46，MIT 授權保留於 licenses/Fluids-MIT.txt。系統分析原有各段 K 設定維持原用法。
+
+## CoolProp 冷卻液物性
+
+新增 CoolProp 物性頁籤，水及 EG/PG 的 10、20、25、30、40、50、60 wt%（重量濃度）。由 CoolProp 8.0.0 於 300 kPa abs 產生 0–90°C、每 1°C 的表。密度、比熱、導熱係數線性插值，黏度對數插值，禁止外推。MEG/MPG 為 Melinder 模型，不代表特定品牌添加劑。
+
+可匯出物性 CSV 或帶入單段管路手動物性，保留液體名稱與濃度基準。帶入固定密度／黏度，改溫度須重新帶入。原 Dynalene 50/25 vol% 預設與系統分析不變，wt% 不直接當 vol%。
+
+安裝 `CoolProp==8.0.0` 後用 `python scripts/generate-coolprop.py` 重建。120 個非整數溫度參考點確認插值誤差 <0.1%，不代表實驗精度。MIT 聲明位於 `licenses/CoolProp-MIT.txt`。

@@ -5,6 +5,7 @@ export type Method = 'colebrook' | 'churchill' | 'max';
 export type BendInput = { angle: 45 | 90 | 180; count: number; radius: number; k: number };
 export type FittingInput = {kind:'manual'|'entrance'|'exit'|'expansion';count:number;diameter:number;outlet:number;k:number};
 export type Inputs = {
+  customFluidName?:string;
   fittings?: FittingInput[];
   fluid: Fluid; temperature: number; custom: boolean; density: number; viscosity: number;
   shape: Shape; diameter: number; width: number; height: number; length: number; roughness: number;

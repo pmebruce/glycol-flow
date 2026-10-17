@@ -1,4 +1,5 @@
 'use client';
+import { CoolPropPanel } from '@/components/coolprop-panel';
 import { FittingsEditor } from '@/components/fittings-editor';
 import { useEffect,useMemo,useState } from 'react';
 import { ArrowDown,ArrowDownToLine,ArrowRight,BookOpen,Check,ChevronRight,Circle,Download,Droplets,Gauge,Info,Printer,RectangleHorizontal,RotateCcw,Smartphone,Thermometer,TriangleAlert,WifiOff } from 'lucide-react';
@@ -36,7 +37,7 @@ function Report({r,unit}:{r:SuccessResult;unit:keyof typeof PRESSURE_UNITS}) {
 }
 function exportReport(r:SuccessResult) {
   const rows:(string|number|null)[][]=[['液冷壓降計算報告','數值','單位'],['建立時間',new Date().toISOString(),'UTC'],
-    ['冷卻液',r.i.fluid==='eg50'?'EG 50%':'PG 25%','vol%'],['物性來源',r.i.custom?'手動物性':'Dynalene 原廠表插值',''],['平均液溫',r.i.temperature,'°C'],['密度',r.p.rho,'kg/m³'],['動力黏度',r.p.muMPas,'mPa·s'],['運動黏度',r.p.nu*1e6,'mm²/s'],
+    ['冷卻液',r.i.custom?(r.i.customFluidName||'手動／供應商物性'):(r.i.fluid==='eg50'?'EG 50%':'PG 25%'),r.i.custom?'依物性名稱':'vol%'],['物性來源',r.i.custom?'手動物性':'Dynalene 原廠表插值',''],['平均液溫',r.i.temperature,'°C'],['密度',r.p.rho,'kg/m³'],['動力黏度',r.p.muMPas,'mPa·s'],['運動黏度',r.p.nu*1e6,'mm²/s'],
     ['流道形狀',r.i.shape==='circle'?'圓管':'矩形',''],['圓管內徑',r.i.shape==='circle'?r.i.diameter:'不適用','mm'],['矩形寬',r.i.shape==='rectangle'?r.i.width:'不適用','mm'],['矩形高',r.i.shape==='rectangle'?r.i.height:'不適用','mm'],['水力直徑',r.g.dh*1000,'mm'],['截面積',r.g.area*1e6,'mm²'],['直管長度（不含彎頭）',r.i.length,'m'],['絕對粗糙度',r.i.roughness,'mm'],
     ['體積流量',r.q*60000,'L/min'],['平均流速',r.v,'m/s'],['雷諾數',r.re,''],['流況',r.f.regime,''],['摩擦模型',r.f.name,''],['Darcy 摩擦係數',r.f.f,''],['彎頭模式',r.i.bendMode==='auto'?'Rennels':'手動 K',''],['附加K',r.i.extraK,''],
     ['直管壓降',r.straight,'Pa'],['彎頭壓降',r.bendDrop,'Pa'],['附加壓降',r.extra,'Pa'],['逐項配件壓降',r.fittingDrop,'Pa'],['總壓降',r.total,'Pa'],['總壓降',r.total===null?null:r.total/1000,'kPa'],['液體揚程',r.head,'m'],['液壓功率',r.hydraulicPower,'W']];
@@ -53,7 +54,7 @@ export default function Home() {
   const [form,setForm]=useState<Draft>(()=>createDraft());
   const [hydrated,setHydrated]=useState(false),[saved,setSaved]=useState(true),[unit,setUnit]=useState<keyof typeof PRESSURE_UNITS>('kPa');
   const [installOpen,setInstallOpen]=useState(false),[resetOpen,setResetOpen]=useState(false),[toast,setToast]=useState('');
-  const [view,setView]=useState<'single'|'system'>('single');
+  const [view,setView]=useState<'single'|'system'|'properties'>('single');
   const pwa=usePwa();
   useEffect(()=>{try{const stored=localStorage.getItem(STORAGE_KEY);if(stored)setForm(restoreDraft(stored));}catch{setSaved(false);}setHydrated(true);},[]);
   useEffect(()=>{if(!hydrated)return;const timer=setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,form}));setSaved(true);}catch{setSaved(false);}},250);return ()=>clearTimeout(timer);},[form,hydrated]);
@@ -75,11 +76,11 @@ export default function Home() {
     <a href={view==='single'?'#calculation':'#system-analysis'} className="skip-link">跳到計算輸入</a>
     <header className="tool-hero">
       <div className="tool-hero-nav"><a className="tool-home-link" href="https://pmebruce.github.io/engineering-toolbox/">← 工程工具箱</a><Button className="install-button tool-install" variant="outline" onClick={async()=>{if(!await pwa.install())setInstallOpen(true);}}><Smartphone/>{pwa.installed?'已安裝':'加入主畫面'}</Button></div>
-      <div className="tool-hero-main"><img className="tool-hero-logo" src="./icons/icon-192-v9.png" alt="GLYCOL FLOW Logo"/><div className="tool-hero-copy"><p className="tool-kicker">GLYCOL FLOW / PRESSURE DROP</p><h1>{view==='single'?'液冷壓降計算器':'液冷系統分析'}</h1></div></div>
-      <p className="tool-hero-description">{view==='single'?'從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。':'組裝共用管路與並聯支路，找出泵浦實際工作點。'}</p>
+      <div className="tool-hero-main"><img className="tool-hero-logo" src="./icons/icon-192-v9.png" alt="GLYCOL FLOW Logo"/><div className="tool-hero-copy"><p className="tool-kicker">GLYCOL FLOW / PRESSURE DROP</p><h1>{view==='single'?'液冷壓降計算器':view==='system'?'液冷系統分析':'冷卻液物性查詢'}</h1></div></div>
+      <p className="tool-hero-description">{view==='single'?'從流道尺寸，到所需壓差。圓管與矩形，一次算清楚。':view==='system'?'組裝共用管路與並聯支路，找出泵浦實際工作點。':'查詢水與不同重量濃度 EG／PG 的隨溫物性。'}</p>
     </header>
     <main>
-      <div className="app-mode-tabs" aria-label="計算模式"><Button variant="ghost" className={view==='single'?'active':''} aria-pressed={view==='single'} onClick={()=>setView('single')}>單段管路</Button><Button variant="ghost" className={view==='system'?'active':''} aria-pressed={view==='system'} onClick={()=>setView('system')}>系統分析</Button></div>
+      <div className="app-mode-tabs" aria-label="計算模式"><Button variant="ghost" className={view==='single'?'active':''} aria-pressed={view==='single'} onClick={()=>setView('single')}>單段管路</Button><Button variant="ghost" className={view==='system'?'active':''} aria-pressed={view==='system'} onClick={()=>setView('system')}>系統分析</Button><Button variant="ghost" className={view==='properties'?'active':''} aria-pressed={view==='properties'} onClick={()=>setView('properties')}>CoolProp 物性</Button></div>
       {view==='single'?<>
       <div className="mode-row"><div className="shape-switch" aria-label="流道形狀"><Button variant="ghost" aria-pressed={form.shape==='circle'} onClick={()=>set('shape','circle')} className={form.shape==='circle'?'active':''}><Circle/>圓管</Button><Button variant="ghost" aria-pressed={form.shape==='rectangle'} onClick={()=>set('shape','rectangle')} className={form.shape==='rectangle'?'active':''}><RectangleHorizontal/>矩形流道</Button></div><span className="saved-label">{saved?<Check size={14}/>:<Info size={14}/>} {saved?'設定自動保留於本機':'本機無法保存設定'}</span></div>
       <div className="workspace" id="calculation">
@@ -90,7 +91,7 @@ export default function Home() {
             <NumberField id="temperature" label="平均液溫 T" value={form.temperature} unit="°C" onChange={setNumeric('temperature')} help="使用整段流道的代表液溫；密度與黏度隨溫度更新。"/>
             <dl className="property-strip"><Stat label="密度 ρ" value={n(fluidProps?.rho??null,1)} unit="kg/m³"/><Stat label="動力黏度 μ" value={n(fluidProps?.muMPas??null,3)} unit="mPa·s"/><Stat label="運動黏度 ν" value={n(fluidProps?fluidProps.nu*1e6:null,3)} unit="mm²/s"/></dl>
             <div className="custom-toggle"><Checkbox id="custom-property" checked={form.custom} onCheckedChange={value=>toggleCustom(value===true)}/><label htmlFor="custom-property">使用供應商／實測物性</label><span>選填</span></div>
-            {form.custom&&<div className="manual-properties"><div className="two-fields"><NumberField id="density" label="密度 ρ" value={form.density} unit="kg/m³" onChange={setNumeric('density')}/><NumberField id="viscosity" label="動力黏度 μ" value={form.viscosity} unit="mPa·s" onChange={setNumeric('viscosity')}/></div><p className="field-help">手動模式不會隨溫度自動更新；1 cP = 1 mPa·s。</p></div>}
+            {form.custom&&<div className="manual-properties"><label className="field">物性名稱／濃度基準<input maxLength={100} value={form.customFluidName||''} onChange={e=>set('customFluidName',e.target.value)} placeholder="供應商、液體、wt% 或 vol%"/></label><div className="two-fields"><NumberField id="density" label="密度 ρ" value={form.density} unit="kg/m³" onChange={setNumeric('density')}/><NumberField id="viscosity" label="動力黏度 μ" value={form.viscosity} unit="mPa·s" onChange={setNumeric('viscosity')}/></div><p className="field-help">手動模式不會隨溫度自動更新；1 cP = 1 mPa·s。</p></div>}
           </section>
           <section className="panel"><div className="panel-heading"><h2>{form.shape==='circle'?<Circle/>:<RectangleHorizontal/>}流道幾何</h2><span className="section-index">02</span></div>
             <FlowDiagram shape={form.shape}/>
@@ -127,7 +128,7 @@ export default function Home() {
         </aside>
       </div>
       <Formulas r={r}/>
-      </>:<SystemAnalysis/>}
+      </>:view==='system'?<SystemAnalysis/>:<CoolPropPanel apply={p=>{setForm(old=>({...old,custom:true,temperature:String(p.t),density:String(p.rho),viscosity:String(p.mu*1000),customFluidName:p.name+' · CoolProp '+p.pressurePa/1000+' kPa abs'}));setView('single');setToast('已帶入 '+p.name+' 在 '+p.t+' °C 的固定物性');}}/>}
     </main>
     <footer className="site-footer"><span>GLYCOL FLOW <b>·</b> 工程估算工具</span><span>EG 50% / PG 25% · vol%</span><Button variant="ghost" onClick={()=>setInstallOpen(true)}>加入主畫面 <ArrowDownToLine size={16}/></Button></footer>
     {view==='single'&&<div className="mobile-result-bar"><div><span>{r?.incomplete?'總壓降待定':'總壓降'}</span><strong>{totalText}<small>{unit}</small></strong></div><a href="#results">查看結果 <ArrowRight size={19}/></a></div>}
