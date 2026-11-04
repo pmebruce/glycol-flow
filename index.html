@@ -20,11 +20,49 @@
   <link rel="icon" href="./favicon-v9.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon-v9.png" sizes="180x180">
   <link rel="manifest" href="./manifest.webmanifest">
+  <script>
+function incomingFluid() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("fp") !== "1") return null;
+  const kind = params.get("fluid");
+  if (kind !== "Water" && kind !== "MEG" && kind !== "MPG") return null;
+  const keys = ["temp","conc","rho","mu","cp","k"];
+  if (keys.some(key => !params.get(key)?.trim())) return null;
+  const [temp,conc,rho,mu,cp,k] = keys.map(key => Number(params.get(key)));
+  if (![temp,conc,rho,mu,cp,k].every(Number.isFinite) || temp < -50 || temp > 95 ||
+      conc < 0 || conc > 60 || rho <= 0 || rho > 2000 || mu <= 0 || mu > 100 ||
+      cp <= 0 || cp > 10000 || k <= 0 || k > 5) return null;
+  const name = kind === "Water" ? "水" : (kind === "MEG" ? "EG" : "PG") + " " + conc + " wt%";
+  return {name,temp,rho,mu,cp,k};
+}
+const importedFluid = incomingFluid();
+if (importedFluid) {
+  try {
+    const key = "glycol-flow-settings-v1";
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(key)); } catch {}
+    const prior = saved?.version === 1 && saved.form && typeof saved.form === "object" ? saved.form : {};
+    const {name,temp,rho,mu} = importedFluid;
+    const form = {...prior,custom:true,temperature:String(temp),density:String(rho),viscosity:String(mu*1000),
+      customFluidName:name+" · 流體物性查詢 @ "+temp+" °C"};
+    localStorage.setItem(key,JSON.stringify({version:1,form}));
+    history.replaceState(null,"",location.pathname+location.hash);
+  } catch {
+    window.addEventListener("DOMContentLoaded",()=>{
+      const message=document.createElement("p");
+      message.textContent="瀏覽器未允許儲存，無法帶入物性。請使用手動物性欄位。";
+      message.setAttribute("role","alert");
+      document.body.prepend(message);
+    });
+  }
+}
+  </script>
   <script type="module" crossorigin src="./assets/index-BDX0sbZ0.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-Bv0lJBrY.css">
 </head>
 <body>
   <div id="root"></div>
+  <p style="text-align:center">液冷壓降 · 版本 2026-11-04.1</p>
   <noscript>請啟用 JavaScript 以使用壓降計算器。</noscript>
 </body>
 </html>
